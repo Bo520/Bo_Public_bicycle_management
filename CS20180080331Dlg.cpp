@@ -989,7 +989,7 @@ void CCS20180080331Dlg::OnLButtonDown(UINT nFlags, CPoint point)
 				if (x2 <= 4 && y2 <= 4)
 				{
 					p->MoveTo(x, y);
-					p->LineTo(x, y);
+					p->LineTo(x, y);//将
 					ReleaseDC(p);
 					break;
 				}
@@ -1033,7 +1033,7 @@ void CCS20180080331Dlg::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CCS20180080331Dlg::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	// 鼠标左键抬起将点换成原来的颜色
 	GetCursorPos(&point);
 	CRect map_ctr2;
 	(this->GetDlgItem(IDC_STATIC_draw_map))->GetWindowRect(&map_ctr2);   //获得地图相对屏幕左上角的坐标，/存储到rect_ctr中
