@@ -4,10 +4,13 @@
 #include <cstring>
 #include <vector>
 #include <cstdlib>
+#include <math.h>
 
 using namespace std;
 
 #pragma once
+
+
 
 
 // CCS20180080331Dlg 对话框
@@ -50,6 +53,9 @@ public:
 	afx_msg void OnBnClickedButtonsearchbyid();
 	afx_msg void OnBnClickedButtontrackuser();
 
+	int print_station = 0, print_repair = 0;
+
+
 
 
 
@@ -58,10 +64,12 @@ public:
 		RECT m_cRectLayerWin;
 		m_cRectLayerWin.left = 0;
 		m_cRectLayerWin.top = 0;
-		m_cRectLayerWin.right = 1000;
-		m_cRectLayerWin.bottom = 1000;
+		m_cRectLayerWin.right = 600;
+		m_cRectLayerWin.bottom = 860;
 		InvalidateRect(&m_cRectLayerWin);
 		UpdateWindow();
+		print_repair = 0;
+		print_station = 0;
 	}
 
 	afx_msg void OnBnClickedButton3();
@@ -99,6 +107,22 @@ public:
 	CStatic m_draw_map;
 	afx_msg void OnCbnSelchangeCombo1display();
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	// 计算距离的第一个站点// 计算距离的第一个站点
+	CComboBox m_combox_station1;
+	// 计算距离的第二个站点
+	CComboBox m_combox_station2;
+	// 用于展示两站点之间的距离
+	CEdit m_edit_distance;
+	afx_msg void OnBnClickedButton4();
+	afx_msg void OnEnChangeEdit4();
+	// 实时显示站名
+	CString m_edit_name;
+	afx_msg void OnEnChangeEdit2();
+	afx_msg void OnEnChangeEditId();
+	afx_msg void OnCbnSelchangeCombo3();
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnBnClickedButton5();
 };
 
 

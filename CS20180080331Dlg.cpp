@@ -67,6 +67,7 @@ CCS20180080331Dlg::CCS20180080331Dlg(CWnd* pParent /*=nullptr*/)
 	, m_stationid_remain(0)
 	, m_stationid_addrass(0)
 	, m_edit_id_input(0)
+	, m_edit_name(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDI_ICON_LOGO);
 }
@@ -79,6 +80,10 @@ void CCS20180080331Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO1, m_combox_track_users);
 	DDX_Control(pDX, IDC_COMBO2, m_combox_track_users2);
 	DDX_Control(pDX, IDC_STATIC_draw_map, m_draw_map);
+	DDX_Control(pDX, IDC_COMBO3, m_combox_station1);
+	DDX_Control(pDX, IDC_COMBO4, m_combox_station2);
+	DDX_Control(pDX, IDC_EDIT5, m_edit_distance);
+	DDX_Text(pDX, IDC_EDIT4, m_edit_name);
 }
 
 BEGIN_MESSAGE_MAP(CCS20180080331Dlg, CDialogEx)
@@ -99,6 +104,15 @@ ON_CBN_SELCHANGE(IDC_COMBO2, &CCS20180080331Dlg::OnCbnSelchangeCombo2)
 ON_BN_CLICKED(IDC_BUTTON2, &CCS20180080331Dlg::OnBnClickedButton2)
 ON_CBN_SELCHANGE(IDC_COMBO1_display, &CCS20180080331Dlg::OnCbnSelchangeCombo1display)
 ON_WM_MOUSEMOVE()
+//ON_WM_NCMBUTTONDOWN()
+ON_BN_CLICKED(IDC_BUTTON4, &CCS20180080331Dlg::OnBnClickedButton4)
+ON_EN_CHANGE(IDC_EDIT4, &CCS20180080331Dlg::OnEnChangeEdit4)
+ON_EN_CHANGE(IDC_EDIT2, &CCS20180080331Dlg::OnEnChangeEdit2)
+ON_EN_CHANGE(IDC_EDIT_ID, &CCS20180080331Dlg::OnEnChangeEditId)
+ON_CBN_SELCHANGE(IDC_COMBO3, &CCS20180080331Dlg::OnCbnSelchangeCombo3)
+ON_WM_LBUTTONDOWN()
+ON_WM_LBUTTONUP()
+ON_BN_CLICKED(IDC_BUTTON5, &CCS20180080331Dlg::OnBnClickedButton5)
 END_MESSAGE_MAP()
 
 
@@ -322,6 +336,13 @@ void CCS20180080331Dlg::OnBnClickedButtoninputdata()
 		info[i].Latitude_cst_2 = Latitude_2;
 		
 	}
+	for (int i = 0; i < vecLength; i++)
+	{
+		m_combox_station1.AddString(info[i].StationName);
+		m_combox_station2.AddString(info[i].StationName);
+
+	}
+
 	int j;
 	user_info = new splitedinfo[7];
 	for (  j = 0; j < 7; j++)
@@ -414,7 +435,7 @@ void CCS20180080331Dlg::OnBnClickedButtonstationlocation()
 		CDC* pdc;
 		pdc = m_draw_map.GetDC();
 		CPen new_pen;
-		new_pen.CreatePen(1, 6, RGB(128, 0, 128));
+		new_pen.CreatePen(1, 8, RGB(128, 0, 128));
 		pdc->SelectObject(&new_pen);
 		int i = 0;
 		for (i = 1; i < VecLength; i++)
@@ -427,9 +448,7 @@ void CCS20180080331Dlg::OnBnClickedButtonstationlocation()
 			//pdc->Rectangle(x - 1, y - 1, x + 1, y + 1);
 		}
 		ReleaseDC(pdc);
-		
-		
-		
+		print_station = 1;
 	}
 }
 
@@ -451,7 +470,9 @@ void CCS20180080331Dlg::OnBnClickedButtonsearchbyid()
 	else
 	{
 		//清除画图的痕迹
-		ClearWindow();
+		if (if_print == 0) {
+			ClearWindow();
+		}
 		m_combox_track_users.SetCurSel(-1);
 		m_combox_track_users2.SetCurSel(-1);
 		// 通过id查询站点列出信息并在地图上显示
@@ -506,28 +527,23 @@ void CCS20180080331Dlg::OnBnClickedButtonsearchbyid()
 UINT __cdecl track_user(LPVOID lpParam)//多开一个线程画图
 {
 	CCS20180080331Dlg* pThisDlg = (CCS20180080331Dlg*)lpParam;//强制转换
-
 	int differ_x = End_x - Start_x;
 	int differ_y = End_y - Start_y;
-	int ave_x = differ_x / 25, ave_y = differ_y / 25;//每次移动的平均值
+	int ave_x = differ_x / 33, ave_y = differ_y / 33;//每次移动的平均值
 	CPen new_pen;
 	new_pen.CreatePen(1, 3, RGB(255, 0, 0));
 	CDC* new_pDc;
 	new_pDc = pThisDlg->m_draw_map.GetDC();
 	new_pDc->SelectObject(&new_pen);//重新选择路径的线条
 	new_pDc->MoveTo(Start_x + 3, Start_y + 3);
-
 	while (Start_x < End_x - 5 && Start_y < End_y - 5)
 	{
-		//new_pDc->MoveTo((Start_x)+rand() % (ave_x + 1), (Start_y)+rand() % (ave_y + 1));
 		new_pDc->LineTo((Start_x)+rand() % (ave_x + 1), (Start_y)+rand() % (ave_y + 1));
 		Start_x += ave_x;
 		Start_y += ave_y;
 		Sleep(250);
 	}
-	//new_pDc->MoveTo(End_x, End_y);
 	new_pDc->LineTo(End_x - 6, End_y - 6);
-	//ReleaseDC(new_pDc);
 	if_print = 0;
 	return 0;
 }
@@ -557,10 +573,7 @@ void CCS20180080331Dlg::OnBnClickedButtontrackuser()
 }
 
 
-
 	
-
-
 
 void CCS20180080331Dlg::OnBnClickedButton3()
 {
@@ -620,7 +633,33 @@ void CCS20180080331Dlg::OnBnClickedButton3()
 void CCS20180080331Dlg::OnBnClickedButton1()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	
+	if(m_combox_station1.GetCurSel() == m_combox_station2.GetCurSel())
+	{
+		AfxMessageBox(_T("请选择两个不同的站点呀"));
+	}
+	else if (m_combox_station1.GetCurSel()==-1|| m_combox_station2.GetCurSel()==-1||(m_combox_station1.GetCurSel()==-1&& m_combox_station2.GetCurSel()==-1))
+	{
+		AfxMessageBox(_T("您还没有选择两个站点呀"));
+
+	}
+	if(input_data == 0)
+	{
+		AfxMessageBox(_T("请先导入数据鸭(｡•́︿•̀｡)"));
+	}
+	else
+	{
+		double radLat1 = info[m_combox_station1.GetCurSel()].Latitude * 3.141592654 / 180.0;   //角度1˚ = π / 180
+		double radLat2 = info[m_combox_station2.GetCurSel()].Latitude * 3.141592654 / 180.0;   //角度1˚ = π / 180
+		double a = radLat1 - radLat2;//纬度之差
+		double b = info[m_combox_station1.GetCurSel()].Longitude * 3.141592654 / 180.0 - info[m_combox_station2.GetCurSel()].Longitude * 3.141592654 / 180.0;  //经度之差
+		double dst = 2 * asin((sqrt(pow(sin(a / 2), 2) + cos(radLat1) * cos(radLat2) * pow(sin(b / 2), 2))));
+		dst = dst * 6378.137;
+		dst = round(dst * 10000) / 10000;
+		CString str;
+		str.Format(_T("%f"), dst);
+		SetDlgItemText(IDC_EDIT5, str);
+		
+	}
 }
 
 
@@ -653,7 +692,7 @@ void CCS20180080331Dlg::OnBnClickedButtontrackusers()
 
 void CCS20180080331Dlg::OnCbnSelchangeCombo1()
 {
-		// TODO: 在此添加控件通知处理程序代码
+		// 选择一个用户之后就在地图上描绘七点和终点
 	if (input_data == 0)
 	{
 		MessageBox(_T("请先导入数据鸭(｡•́︿•̀｡)"), _T("出错了大兄嘚"), MB_OK | MB_ICONWARNING);
@@ -670,8 +709,8 @@ void CCS20180080331Dlg::OnCbnSelchangeCombo1()
 		m_combobox_display.SetCurSel(-1); //清空组合框编辑框
 		int nSel = m_combox_track_users.GetCurSel();
 		//srand((unsigned)time(NULL));//设置时间种子
-		int start_x = rand() % 140, end_x = 170 + rand() % (438 - 170 + 1);
-		int start_y = rand() % 260, end_y = 460 + rand() % (784 - 460 + 1);//随机生成起点和终点
+		int start_x = rand() % 190, end_x = 190 + rand() % (360 - 190 + 1);
+		int start_y =40+ rand() % (210-40+1), end_y = 636 + rand() % (784 - 636 + 1);//随机生成起点和终点
 		Start_x = start_x;
 		Start_y = start_y;
 		End_x = end_x;
@@ -707,7 +746,7 @@ void CCS20180080331Dlg::OnCbnSelchangeCombo1()
 
 void CCS20180080331Dlg::OnCbnSelchangeCombo2()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 选择一个用户，清空其他下拉框
 	m_combobox_display.SetCurSel(-1);
 	m_combox_track_users.SetCurSel(-1);
 	clear_edite_contral();
@@ -717,7 +756,7 @@ void CCS20180080331Dlg::OnCbnSelchangeCombo2()
 
 void CCS20180080331Dlg::OnBnClickedButton2()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 点击这个按钮查询有损坏车桩的站点
 	if (input_data == 0)
 	{
 		MessageBox(_T("请先导入数据鸭(｡•́︿•̀｡)"), _T("出错了大兄嘚"), MB_OK | MB_ICONWARNING);
@@ -759,14 +798,15 @@ void CCS20180080331Dlg::OnBnClickedButton2()
 			}
 			i++;
 		}
-		//MessageBox(_T("叹号所示站点存在损坏车桩，需要维修(｡•́︿•̀｡)"), _T("查询完毕"), MB_OK | MB_ICONWARNING);
+		MessageBox(_T("叹号所示站点存在损坏车桩，需要维修(｡•́︿•̀｡)"), _T("查询完毕"), MB_OK | MB_ICONWARNING);
+		print_repair = 1;
 	}
 }
 
 
 void CCS20180080331Dlg::OnCbnSelchangeCombo1display()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	// 查站带你信息，并在地图上显示
 	if (input_data == 0)
 	{
 		MessageBox(_T("请先导入数据鸭(｡•́︿•̀｡)"), _T("出错了大兄嘚"), MB_OK | MB_ICONWARNING);
@@ -800,57 +840,263 @@ void CCS20180080331Dlg::OnCbnSelchangeCombo1display()
 		pDC->SelectObject(&pen);
 		int x = ((87.8 - (-info[nSel].Longitude)) * 1460.0), y = ((42.1 - info[nSel].Latitude) * 1960.0);
 		int _x = ((87.8 - (-info[nSel].Longitude)) * 1460.0), _y = ((42.1 - info[nSel].Latitude) * 1960.0);
-		pDC->MoveTo(x, y); //划线开始
-		pDC->LineTo(_x, _y);
-		pDC->TextOutW(x + 5, y, info[nSel].StationName);
+		pDC->MoveTo(x, y); 
+		pDC->LineTo(_x, _y);//画一个点
+
+		pDC->TextOutW(x + 5, y, info[nSel].StationName);//显示信息
 		//pDC->Rectangle(x+10, y, x+30, y+15);
 		ReleaseDC(pDC);
 	}
 }
 
+CString test3, test4;//重写鼠标移动函数，实现地图经纬度和站点显示
 void CCS20180080331Dlg::OnMouseMove(UINT nFlags, CPoint point)
 {
-	// TODO: 在此添加消息处理程序代码和/或调用默认值
 		GetCursorPos(&point);
 		if (input_data == 1)
 		{
-			CString test1, test2, test3, test4;
 			CRect map_ctr;
-			(this->GetDlgItem(IDC_STATIC_draw_map))->GetWindowRect(&map_ctr);   //获得地图相对屏幕左上角的坐标，/存储到rect_ctr中
+			(this->GetDlgItem(IDC_STATIC_draw_map))->GetWindowRect(&map_ctr);  //获得地图相对屏幕左上角的坐标，/存储到rect_ctr中
 			int i = 0;
-			float n_latitude = (42.1 - ((float)point.y - (float)map_ctr.top) / 1960.0);
-			float n_longitude = ((float)point.x - (float)map_ctr.left) / 1460.0 - 87.8;
+			int x1 = point.x - map_ctr.left, y1 = point.y - map_ctr.top;//鼠标在地图中的位置
+			float n_latitude = (42.1 - y1 / 1960.0);
+			float n_longitude = x1 / 1460.0 - 87.8;
 
-			test1.Format(_T("%.2f"), n_latitude);
-			test2.Format(_T("%.2f"), n_longitude);
 			test3.Format(_T("%f"), n_latitude);
 			test4.Format(_T("%f"), n_longitude);
-
-
-			if (n_latitude > 41.7 && n_latitude<42.1 && n_latitude>-87.8 && n_longitude < -87.5)
+			SetDlgItemText(IDC_EDIT3, _T(""));
+			SetDlgItemText(IDC_EDIT2, _T(""));
+			if (x1 > 0 && x1 < 438 && y1>=0 && y1 < 784)
 			{
 				SetDlgItemText(IDC_EDIT3, test3);
 				SetDlgItemText(IDC_EDIT2, test4);
-
-			}
-			else
-			{
-				SetDlgItemText(IDC_EDIT3, _T(""));
-				SetDlgItemText(IDC_EDIT2, _T(""));
-			}
-			for (i = 1; i < VecLength; i++)
-			{
-				if (test1 == info[i].Latitude_cst_2 && test2 == info[i].Longitude_cst_2)
+				for (i = 1; i < VecLength; i++)
 				{
-					SetDlgItemText(IDC_EDIT4, info[i].StationName);
-					break;
+					int x = ((87.8 + info[i].Longitude) * 1460.0), y = ((42.1 - info[i].Latitude) * 1960.0);
+					int x2 = abs(x - x1), y2 = abs(y - y1);
+					if (x2 <= 3 && y2 <= 3)
+					{
+						SetDlgItemText(IDC_EDIT4, info[i].StationName);
+						break;
+					}
+					else
+					{
+						SetDlgItemText(IDC_EDIT4, _T(""));
+					}
 				}
-				else
-				{
-					SetDlgItemText(IDC_EDIT4, _T(""));
 
-				}
 			}
 		}
 	CDialogEx::OnMouseMove(nFlags, point);
+}
+
+
+
+
+
+void CCS20180080331Dlg::OnBnClickedButton4()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	system("start explorer https://github.com/Bo520/Bo_Public_bicycle_management.git");
+}
+
+
+void CCS20180080331Dlg::OnEnChangeEdit4()
+{
+	// TODO:  如果该控件是 RICHEDIT 控件，它将不
+	// 发送此通知，除非重写 CDialogEx::OnInitDialog()
+	// 函数并调用 CRichEditCtrl().SetEventMask()，
+	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
+
+	 //TODO:  在此添加控件通知处理程序代码
+	//if (py == 1)
+	//{
+	//	UpdateData();
+	//	CString temp;
+	//	temp.Format(m_edit_name);
+	//	if (temp == _T(""))
+	//	{
+	//		for (int i = 1; i < VecLength; i++)
+	//		{
+	//				CDC* dc;
+	//				dc = m_draw_map.GetDC();
+	//				CPen pen;
+	//				pen.CreatePen(1, 6, RGB(128, 0, 128));
+	//				dc->SelectObject(&pen);
+	//				int x = ((87.8 + info[i].Longitude) * 1460.0), y = ((42.1 - info[i].Latitude) * 1960.0);
+	//				dc->MoveTo(x, y);
+	//				dc->LineTo(x, y);
+	//				ReleaseDC(dc);
+	//			
+	//		}
+	//	}
+	//}
+}
+
+
+void CCS20180080331Dlg::OnEnChangeEdit2()
+{
+	// TODO:  如果该控件是 RICHEDIT 控件，它将不
+	// 发送此通知，除非重写 CDialogEx::OnInitDialog()
+	// 函数并调用 CRichEditCtrl().SetEventMask()，
+	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
+
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CCS20180080331Dlg::OnEnChangeEditId()
+{
+	// TODO:  如果该控件是 RICHEDIT 控件，它将不
+	// 发送此通知，除非重写 CDialogEx::OnInitDialog()
+	// 函数并调用 CRichEditCtrl().SetEventMask()，
+	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
+
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CCS20180080331Dlg::OnCbnSelchangeCombo3()
+{
+	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+
+void CCS20180080331Dlg::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// 鼠标点击站点将站点描红
+	GetCursorPos(&point);
+	CRect map_ctr1;
+	(this->GetDlgItem(IDC_STATIC_draw_map))->GetWindowRect(&map_ctr1);   //获得地图相对屏幕左上角的坐标，/存储到rect_ctr中
+	int i = 0;
+	if (input_data == 1)
+	{
+
+		if (print_station == 1)
+		{
+			CDC* p;
+			p = m_draw_map.GetDC();
+			CPen pen;
+			pen.CreatePen(1, 8, RGB(255, 0, 0));
+			p->SelectObject(&pen);
+
+			for (i = 1; i < VecLength; i++)
+			{
+				int x = ((87.8 + info[i].Longitude) * 1460.0), y = ((42.1 - info[i].Latitude) * 1960.0);
+				int x1 = point.x - map_ctr1.left, y1 = point.y - map_ctr1.top;
+				int x2 = abs(x - x1), y2 = abs(y - y1);
+				if (x2 <= 4 && y2 <= 4)
+				{
+					p->MoveTo(x, y);
+					p->LineTo(x, y);
+					ReleaseDC(p);
+					break;
+				}
+
+			}
+
+		}
+		else if (print_repair == 1||(print_repair==0&&print_station==0))
+		{
+			CDC* p;
+			p = m_draw_map.GetDC();
+			CPen pen;
+			pen.CreatePen(1, 8, RGB(0, 0, 255));
+			p->SelectObject(&pen);
+
+			for (i = 1; i < VecLength; i++)
+			{
+				int x = ((87.8 + info[i].Longitude) * 1460.0), y = ((42.1 - info[i].Latitude) * 1960.0);
+				int x1 = point.x - map_ctr1.left, y1 = point.y - map_ctr1.top;
+				int x2 = abs(x - x1), y2 = abs(y - y1);
+				if (x2 <= 4 && y2 <= 4)
+				{
+					p->MoveTo(x, y);
+					p->LineTo(x, y);
+					ReleaseDC(p);
+					break;
+				}
+
+			}
+
+		}
+
+	}
+	
+
+
+
+	CDialogEx::OnLButtonDown(nFlags, point);
+}
+
+
+void CCS20180080331Dlg::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	GetCursorPos(&point);
+	CRect map_ctr2;
+	(this->GetDlgItem(IDC_STATIC_draw_map))->GetWindowRect(&map_ctr2);   //获得地图相对屏幕左上角的坐标，/存储到rect_ctr中
+	int i = 0;
+	if (input_data == 1)
+	{
+		if (print_station == 1)
+		{
+			CDC* p;
+			p = m_draw_map.GetDC();
+			CPen pen;
+			pen.CreatePen(1, 8, RGB(128, 0, 128));
+			p->SelectObject(&pen);
+
+			for (i = 1; i < VecLength; i++)
+			{
+				int x = ((87.8 + info[i].Longitude) * 1460.0), y = ((42.1 - info[i].Latitude) * 1960.0);
+				int x1 = point.x - map_ctr2.left, y1 = point.y - map_ctr2.top;
+				int x2 = abs(x - x1), y2 = abs(y - y1);
+				if (x2 <= 4 && y2 <= 4)
+				{
+					p->MoveTo(x, y);
+					p->LineTo(x, y);
+					ReleaseDC(p);
+					break;
+				}
+
+			}
+
+		}
+		else if (print_repair == 1 || (print_repair == 0 && print_station == 0))
+		{
+			CDC* p;
+			p = m_draw_map.GetDC();
+			CPen pen;
+			pen.CreatePen(1, 8, RGB(255, 0, 0));
+			p->SelectObject(&pen);
+
+			for (i = 1; i < VecLength; i++)
+			{
+				int x = ((87.8 + info[i].Longitude) * 1460.0), y = ((42.1 - info[i].Latitude) * 1960.0);
+				int x1 = point.x - map_ctr2.left, y1 = point.y - map_ctr2.top;
+				int x2 = abs(x - x1), y2 = abs(y - y1);
+				if (x2 <= 4 && y2 <= 4)
+				{
+					p->MoveTo(x, y);
+					p->LineTo(x, y);
+					ReleaseDC(p);
+					break;
+				}
+
+			}
+			CDialogEx::OnLButtonUp(nFlags, point);
+		}
+	}
+}
+
+
+void CCS20180080331Dlg::OnBnClickedButton5()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	if (if_print == 0)
+	{
+		ClearWindow();
+	}
 }
